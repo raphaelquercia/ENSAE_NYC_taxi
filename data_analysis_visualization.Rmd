@@ -65,7 +65,7 @@ Importance de la distance à vol d'oiseau dans le trip duration
 ```{r}
 ##Warning too much data points to be plotted => Need to take a subset
 set.seed(1234)
-subset <- data[sample(nrow(diamonds),5000),]
+subset <- data[sample(nrow(data),5000),]
 #plot(trip_duration~distance,data=subset)
 ggplot(subset)+aes(x=distance,y=trip_duration,color)+geom_point(color="blue")
 ```
@@ -81,5 +81,20 @@ data$pickup_rounded_hour <- as.factor(data$pickup_rounded_hour)
 boxplot(trip_duration~pickup_rounded_hour,data=data,main="Temps de trajet selon heure",outline=FALSE)
 boxplot(distance~pickup_rounded_hour,data=data,main="Distance parcourue selon heure",outline=FALSE)
 
+```
+
+
+Analyse de la covariance heure / distance
+Juste pour vérifier que les 2 ont bien un impact
+```{r}
+library(FactoMineR)
+complet <- AovSum(trip_duration~pickup_rounded_hour + distance,data=data)
+
+
+set.seed(1234)
+subset <- data[sample(nrow(data),5000),]
+ggplot(subset)+aes(y=trip_duration, x=distance, col=pickup_rounded_hour) +geom_point() + geom_smooth(method=lm, se=FALSE)
+
 
 ```
+
