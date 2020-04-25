@@ -22,7 +22,7 @@ Analyse trip_duration et gestion des valeurs aberrantes
 print(paste("Initialement, le dataset contient : ", nrow(data), " lignes", sep=""))
 
 ## Toute valeur de trip_duration au delà de 10 x l ecart inter-quartile est considérée comme aberrante
-resultat <- boxplot(data[,"trip_duration"],range = 10, outline = FALSE)
+resultat <- boxplot(data[,"trip_duration"],range = 10, outline = FALSE,plot=FALSE)
 valeurs_aberrantes <- resultat$out
 print(paste("LE nombre de valeurs aberrantes est : ", length(valeurs_aberrantes), sep=""))
 min_valeur_aberrante <- min(valeurs_aberrantes)
@@ -31,9 +31,9 @@ print(paste("On enleve les trajets de plus de : ", min_valeur_aberrante/3600, " 
 ##Enlever valeurs aberrantes
 data <- data %>% filter(trip_duration<=min_valeur_aberrante)
 
-##Plot avec 1.5 x ecart interquartile
-plot<-boxplot(data[,"trip_duration"])
-plot<-boxplot(data[,"trip_duration"],outline = FALSE)
+##Plot avec 1.5 x ecart interquartile une fois les valeurs aberrantes enlevées
+plot<-boxplot(data[,"trip_duration"], main = 'Boxplot durée trajet')
+plot<-boxplot(data[,"trip_duration"],outline = FALSE, main = 'Boxplot durée trajet')
 
 #Histogramme
 plot_hist<-hist(data$trip_duration, main="Distribution durée de trajet", col="blue",breaks = seq(0, 8000, by = 200))
@@ -46,7 +46,7 @@ Analyse distance et gestion des valeurs aberrantes
 print(paste("Initialement, le dataset contient : ", nrow(data), " lignes", sep=""))
 
 ## Toute valeur de trip_duration au delà de 10 x l ecart inter-quartile est considérée comme aberrante
-resultat <- boxplot(data[,"distance"],range = 10)
+resultat <- boxplot(data[,"distance"],range = 10,plot=FALSE)
 valeurs_aberrantes <- resultat$out
 print(paste("LE nombre de valeurs aberrantes est : ", length(valeurs_aberrantes), sep=""))
 min_valeur_aberrante <- min(valeurs_aberrantes)
@@ -55,11 +55,14 @@ min_valeur_aberrante <- min(valeurs_aberrantes)
 data <- data %>% filter(distance<=min_valeur_aberrante)
 
 ##Plot a nouveau maintenant que les outliers extremes sont enlevés
-plot<-boxplot(data[,"distance"],range = 3,outline=FALSE)
+plot<-boxplot(data[,"distance"],range = 3,outline=FALSE, main = 'Boxplot distance')
 
 #Histogramme
 plot_hist<-hist(data$distance, main="Distribution distance", col="blue")
+
 ```
+
+
 
 
 
@@ -95,7 +98,9 @@ complet <- AovSum(trip_duration~pickup_rounded_hour + distance,data=data)
 
 set.seed(1234)
 subset <- data[sample(nrow(data),5000),]
-ggplot(subset)+aes(y=trip_duration, x=distance, col=pickup_rounded_hour) +geom_point() + geom_smooth(method=lm, se=FALSE)
+ggplot(subset)+aes(y=trip_duration, x=distance, col=pickup_rounded_hour) +geom_point() +
+  geom_smooth(method=lm, se=FALSE)+
+  ggtitle("Impact heure sur coeff regression lineaire") 
 
 
 ```
@@ -123,7 +128,8 @@ complet <- AovSum(trip_duration~week_day + distance,data=data)
 
 set.seed(1234)
 subset <- data[sample(nrow(data),5000),]
-ggplot(subset)+aes(y=trip_duration, x=distance, col=week_day) +geom_point() + geom_smooth(method=lm, se=FALSE)
+ggplot(subset)+aes(y=trip_duration, x=distance, col=week_day) +geom_point() + geom_smooth(method=lm, se=FALSE)+
+  ggtitle("Impact du weekday sur coeff regression lineaire") 
 
 
 ```
