@@ -21,20 +21,22 @@ Analyse trip_duration et gestion des valeurs aberrantes
 ```{r}
 print(paste("Initialement, le dataset contient : ", nrow(data), " lignes", sep=""))
 
-## Toute valeur de trip_duration au delà de 5 x l ecart inter-quartile est considérée comme aberrante
-resultat <- boxplot(data[,"trip_duration"],range = 5)
+## Toute valeur de trip_duration au delà de 10 x l ecart inter-quartile est considérée comme aberrante
+resultat <- boxplot(data[,"trip_duration"],range = 10, outline = FALSE)
 valeurs_aberrantes <- resultat$out
 print(paste("LE nombre de valeurs aberrantes est : ", length(valeurs_aberrantes), sep=""))
 min_valeur_aberrante <- min(valeurs_aberrantes)
+print(paste("On enleve les trajets de plus de : ", min_valeur_aberrante/3600, " heures",sep=""))
 
 ##Enlever valeurs aberrantes
 data <- data %>% filter(trip_duration<=min_valeur_aberrante)
 
-##Plot a nouveau maintenant que les outliers extremes sont enlevés
+##Plot avec 1.5 x ecart interquartile
 plot<-boxplot(data[,"trip_duration"])
+plot<-boxplot(data[,"trip_duration"],outline = FALSE)
 
 #Histogramme
-plot_hist<-hist(data$trip_duration, main="Distribution durée de trajet", col="blue")
+plot_hist<-hist(data$trip_duration, main="Distribution durée de trajet", col="blue",breaks = seq(0, 8000, by = 200))
 
 ```
 
