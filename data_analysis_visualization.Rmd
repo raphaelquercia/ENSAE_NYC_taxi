@@ -34,7 +34,7 @@ data <- data %>% filter(trip_duration<=min_valeur_aberrante)
 plot<-boxplot(data[,"trip_duration"])
 
 #Histogramme
-plot_hist<-hist(data$trip_duration, main="Histogramme", col="blue")
+plot_hist<-hist(data$trip_duration, main="Distribution durée de trajet", col="blue")
 
 ```
 
@@ -56,7 +56,7 @@ data <- data %>% filter(distance<=min_valeur_aberrante)
 plot<-boxplot(data[,"distance"],range = 3,outline=FALSE)
 
 #Histogramme
-plot_hist<-hist(data$distance, main="Histogramme", col="blue")
+plot_hist<-hist(data$distance, main="Distribution distance", col="blue")
 ```
 
 
@@ -94,6 +94,34 @@ complet <- AovSum(trip_duration~pickup_rounded_hour + distance,data=data)
 set.seed(1234)
 subset <- data[sample(nrow(data),5000),]
 ggplot(subset)+aes(y=trip_duration, x=distance, col=pickup_rounded_hour) +geom_point() + geom_smooth(method=lm, se=FALSE)
+
+
+```
+
+
+Importance du jour de la semaine
+```{r}
+
+## rounded hour as factor
+data$week_day <- as.factor(data$week_day)
+
+#On affiche pas les elements qui ne sont pas dans l'usuel range ecart 75% + ecart interquartile x 1.5
+boxplot(trip_duration~week_day,data=data,main="Temps de trajet selon jour de la semaine",outline=FALSE)
+boxplot(distance~week_day,data=data,main="Distance parcourue sselon jour de la semaine",outline=FALSE)
+```
+
+
+Analyse de la covariance jour de semaine / distance
+Attention weekday = 1 => Dimanche  7=>Samedi
+Sur ces graphes, on voit nettement que la durée de trajet est plus faible le WE
+```{r}
+library(FactoMineR)
+complet <- AovSum(trip_duration~week_day + distance,data=data)
+
+
+set.seed(1234)
+subset <- data[sample(nrow(data),5000),]
+ggplot(subset)+aes(y=trip_duration, x=distance, col=week_day) +geom_point() + geom_smooth(method=lm, se=FALSE)
 
 
 ```
