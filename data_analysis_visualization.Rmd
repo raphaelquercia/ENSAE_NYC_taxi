@@ -1,0 +1,85 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+
+Imports and load data
+```{r}
+library(dplyr)
+library(readr)
+
+data <-read_csv("data/data_clean_2.csv")
+data <- data %>% select(-X1)
+```
+
+Analyse trip_duration et gestion des valeurs aberrantes
+```{r}
+print(paste("Initialement, le dataset contient : ", nrow(data), " lignes", sep=""))
+
+## Toute valeur de trip_duration au delà de 5 x l ecart inter-quartile est considérée comme aberrante
+resultat <- boxplot(data[,"trip_duration"],range = 5)
+valeurs_aberrantes <- resultat$out
+print(paste("LE nombre de valeurs aberrantes est : ", length(valeurs_aberrantes), sep=""))
+min_valeur_aberrante <- min(valeurs_aberrantes)
+
+##Enlever valeurs aberrantes
+data <- data %>% filter(trip_duration<=min_valeur_aberrante)
+
+##Plot a nouveau maintenant que les outliers extremes sont enlevés
+plot<-boxplot(data[,"trip_duration"])
+
+#Histogramme
+plot_hist<-hist(data$trip_duration, main="Histogramme", col="blue")
+
+```
+
+
+Analyse distance et gestion des valeurs aberrantes
+```{r}
+print(paste("Initialement, le dataset contient : ", nrow(data), " lignes", sep=""))
+
+## Toute valeur de trip_duration au delà de 10 x l ecart inter-quartile est considérée comme aberrante
+resultat <- boxplot(data[,"distance"],range = 10)
+valeurs_aberrantes <- resultat$out
+print(paste("LE nombre de valeurs aberrantes est : ", length(valeurs_aberrantes), sep=""))
+min_valeur_aberrante <- min(valeurs_aberrantes)
+
+##Enlever valeurs aberrantes
+data <- data %>% filter(distance<=min_valeur_aberrante)
+
+##Plot a nouveau maintenant que les outliers extremes sont enlevés
+plot<-boxplot(data[,"distance"],range = 3,outline=FALSE)
+
+#Histogramme
+plot_hist<-hist(data$distance, main="Histogramme", col="blue")
+```
+
+
+
+Importance de la distance à vol d'oiseau dans le trip duration
+```{r}
+##Warning too much data points to be plotted => Need to take a subset
+set.seed(1234)
+subset <- data[sample(nrow(diamonds),5000),]
+#plot(trip_duration~distance,data=subset)
+ggplot(subset)+aes(x=distance,y=trip_duration,color)+geom_point(color="blue")
+```
+
+
+Importance de l'heure de pickup
+```{r}
+
+## rounded hour as factor
+data$pickup_rounded_hour <- as.factor(data$pickup_rounded_hour)
+
+#On affiche pas les elements qui ne sont pas dans l'usuel range ecart 75% + ecart interquartile x 1.5
+boxplot(trip_duration~pickup_rounded_hour,data=data,main="Temps de trajet selon heure",outline=FALSE)
+boxplot(distance~pickup_rounded_hour,data=data,main="Distance parcourue selon heure",outline=FALSE)
+
+
+```
